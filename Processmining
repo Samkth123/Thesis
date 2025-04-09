@@ -1,0 +1,1635 @@
+import re
+from collections import defaultdict
+import numpy as np
+
+
+participants_rwanda = [
+    {
+        "personal_info": {
+            "name": "Muhire",
+            "email": "Not provided",
+            "experience": 5,
+            "country_of_origin": "Rwanda",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "5 minutes",
+                 "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "10 minutes", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "15 minutes", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "5 minutes", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "15 minutes", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "10 minutes", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "10 minutes", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "8 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "5 minutes", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "5 minutes", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "5 minutes", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "10 minutes", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "5 minutes", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Merlyne Iradukunda",
+            "email": "Not provided",
+            "experience": 2,
+            "country_of_origin": "Rwanda",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "8 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "30mins", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30mins", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "10 minutes", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "20minutes", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "10minutes", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "45minutes", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "1hour", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "20 minutes", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "15 minutes", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Elvis Rugamba",
+            "email": "Not provided",
+            "experience": 5,
+            "country_of_origin": "Rwanda",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "5 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "15 minutes", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "2 hour", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Adeline",
+            "email": "adelinetuyizere333@gmail.com",
+            "experience": 0,
+            "country_of_origin": "Rwanda",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "skip", "comment": "No comment provided"}
+            ],
+            "codeReviewProcess": [],
+            "deploymentProcess": [],
+            "bugFixProcess": [],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "mutabaruka fred",
+            "email": "mutabarukaf258@gmail.com",
+            "experience": 0,
+            "country_of_origin": "Rwanda",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "skip", "comment": "No comment provided"}
+            ],
+            "codeReviewProcess": [],
+            "deploymentProcess": [],
+            "bugFixProcess": [],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Issa Jean Marie",
+            "email": "jeanmarieissa@gmail.com",
+            "experience": 5,
+            "country_of_origin": "Rwanda",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "5 minutes",
+                 "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "10 minutes", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "10 minutes", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "7 minutes", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "10 minutes", "comment": "No comment provided"},
+                {
+                    "step": "Addressing feedback",
+                    "time": "15 minutes",
+                    "comment": "Diffrent between seniors and juniors, seniors faster, juniors slower maybe 20 minutes",
+                },
+                {"step": "Final approval", "time": "30 minutes", "comment": "Working remote affects this"},
+            ],
+            "deploymentProcess": [
+                {
+                    "step": "Build and test automation",
+                    "time": "8 hours",
+                    "comment": "Adjust continuosly as project progresses",
+                },
+                {"step": "Staging deployment and testing", "time": "10 minutes", "comment": "No comment provided"},
+                {
+                    "step": "Stakeholder review",
+                    "time": "1 hour",
+                    "comment": "1 or 2 meetings max for stakeholder to go through",
+                },
+                {"step": "Production deployment", "time": "10 minutes", "comment": "No comment provided"},
+                {
+                    "step": "Post-deployment verification",
+                    "time": "1 week",
+                    "comment": "As he goes to clint places and does it continously",
+                },
+            ],
+            "bugFixProcess": [
+                {
+                    "step": "Bug investigation and reproduction",
+                    "time": "5 minutes",
+                    "comment": "Have a way to report bugs back automatically",
+                },
+                {"step": "Fix implementation and testing", "time": "45 minutes", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "10 minutes", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "10 minutes", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Iradukunda pacifique",
+            "email": "pacifique@awesomity.rw",
+            "experience": 2,
+            "country_of_origin": "Rwanda",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "5 minutes",
+                 "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "20 minutes", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "15 minutes", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "20 minutes", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {
+                    "step": "Build and test automation",
+                    "time": "6 hours",
+                    "comment": "have documents that they follow through as well, takes longer if its a new project with new pipelines. Longest is 12 hours",
+                },
+                {"step": "Staging deployment and testing", "time": "18 minutes", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "35 minutes", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "5 minutes",
+                 "comment": "We have another team for testing deployed projects"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "45 minutes", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "20 minutes", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "20 minutes", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Nsanzimana Fabrice",
+            "email": "fabrice.nsanzimana2004@gmail.com",
+            "experience": 2,
+            "country_of_origin": "Rwanda",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "1 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "4 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "2 hours", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "1 hours", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hours", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "20mins", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "5 hours", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "50 mins", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "45 mins", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "40 mins", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "50 mins", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Mihigo prince jordan",
+            "email": "mihigojordan8@gmail.com",
+            "experience": 1,
+            "country_of_origin": "Rwanda",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "10 minutes",
+                 "comment": "Voluptatibus in eaqu"},
+                {"step": "Implementation planning and design", "time": "10 minutes", "comment": "Eligendi et non susc"},
+                {"step": "Development and testing", "time": "10 minutes", "comment": "Et consequatur Sunt"},
+                {"step": "Documentation and pull request", "time": "10 minutes", "comment": "Nostrud voluptates q"},
+                {"step": "Issue verification and closure", "time": "10 minutes", "comment": "Et amet quia esse "},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "10 minutes", "comment": "Et et culpa unde eu"},
+                {"step": "Running tests locally", "time": "10 minutes", "comment": "Veniam atque dolor "},
+                {"step": "Peer review process", "time": "10 minutes", "comment": "Culpa non qui sint "},
+                {"step": "Addressing feedback", "time": "10 minutes", "comment": "Inventore ipsam rem "},
+                {"step": "Final approval", "time": "10 minutes", "comment": "Minima earum est vo"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "10 minutes", "comment": "Ab proident tempora"},
+                {"step": "Staging deployment and testing", "time": "10 minutes", "comment": "Lorem labore neque e"},
+                {"step": "Stakeholder review", "time": "10 minutes", "comment": "Sint eius consequat"},
+                {"step": "Production deployment", "time": "10 minutes", "comment": "Earum eos dolore cu"},
+                {"step": "Post-deployment verification", "time": "10 minutes", "comment": "Eum animi qui offic"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "10 minutes", "comment": "Non facilis eveniet"},
+                {"step": "Fix implementation and testing", "time": "10 minutes", "comment": "Dolore saepe maiores"},
+                {"step": "Documentation and review", "time": "10 minutes", "comment": "Ut et vel enim iste "},
+                {"step": "Deployment and verification", "time": "10 minutes", "comment": "Dolor laboris assume"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "David Tubirye",
+            "email": "Not provided",
+            "experience": 3,
+            "country_of_origin": "Rwanda",
+            "exam_id": "Norrsken",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "10 minutes", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "10 minutes", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "10 minutes", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "David Hitimana",
+            "email": "Not provided",
+            "experience": 0,
+            "country_of_origin": "Rwanda",
+            "exam_id": "Intern",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "3days", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "2 days", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "2 days", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "1 day", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "2 days", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "3-4 days", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "2 days", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "1 day", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "2 days", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "1 day", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "2 day", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "10 minutes", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "5 hours", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "2 days", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "1 day", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "4 hours", "comment": "No comment provided"},
+            ],
+        },
+    },
+]
+
+# The user also had "dutch_participants" and "swedish_participants" for Netherlands/Sweden
+# We'll define them quickly:
+dutch_participants = [
+    {
+        "personal_info": {
+            "name": "Tess de Vries",
+            "email": "Not provided",
+            "experience": 7,
+            "country_of_origin": "Netherlands",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "1.5 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "4 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "8 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1.5 hours", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "45 minutes", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "8 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "1.5 hours", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Rick",
+            "email": "rick.vl@devdutch.nl",
+            "experience": 5,
+            "country_of_origin": "Netherlands",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "12 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "45 minutes", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "1.5 hours", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "45 minutes", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "4 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Sanne Visser",
+            "email": "Not provided",
+            "experience": 1,
+            "country_of_origin": "Netherlands",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "12 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "1.5 hours", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "8 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "2 hours", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Maarten",
+            "email": "Not provided",
+            "experience": 6,
+            "country_of_origin": "Netherlands",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "1 day", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "45 minutes", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Esmee",
+            "email": "Not provided",
+            "experience": 2,
+            "country_of_origin": "Netherlands",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "5 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "2 days", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "2.5 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "1.5 hours", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "45 minutes", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "1 day", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Cas",
+            "email": "Not provided",
+            "experience": 4,
+            "country_of_origin": "Netherlands",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "2 days", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "45 minutes", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "45 minutes", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "45 minutes", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "1.5 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "4 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "45 minutes", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Hanous Dedki",
+            "email": "Not provided",
+            "experience": 2,
+            "country_of_origin": "Netherlands",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {
+                    "step": "Investigation and root cause analysis",
+                    "time": "2.5 hours",
+                    "comment": "No comment provided",
+                },
+                {"step": "Implementation planning and design", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "2 days", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "1.5 hours", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "45 minutes", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "3.5 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "1.5 hours", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Thjis",
+            "email": "Not provided",
+            "experience": 7,
+            "country_of_origin": "Netherlands",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "1.5 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "4 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "8 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "45 minutes", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "4 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "1.5 hours", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Bram",
+            "email": "Not provided",
+            "experience": 3,
+            "country_of_origin": "Netherlands",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "2.5 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "1 day", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "45 minutes", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "45 minutes", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Pjotr",
+            "email": "Not provided",
+            "experience": 4,
+            "country_of_origin": "Netherlands",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "4 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "2 days", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "45 minutes", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1.5 hours", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "4 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "1.5 hours", "comment": "No comment provided"},
+            ],
+        },
+    },
+]
+
+swedish_participants = [
+    {
+        "personal_info": {
+            "name": "Iley Alvarez Funcke",
+            "email": "iley@kth.se",
+            "experience": 8,
+            "country_of_origin": "Sweden",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {
+                    "step": "Investigation and root cause analysis",
+                    "time": "1 hour",
+                    "comment": "Often shorter, but could take very long sometimes.",
+                },
+                {"step": "Implementation planning and design", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "6 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "10 minutes", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "10 minutes", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "5 minutes", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "6 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "10 minutes", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "2.5 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "30 minutes", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "30 minutes", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Atheer Salim",
+            "email": "atheerwaled66@hotmail.se",
+            "experience": 5,
+            "country_of_origin": "Sweden",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "1 day", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "1 week", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "2 hours", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "30 min", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "2 days", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "2.5 hours", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "15 min", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "30 min", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "3.5 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "30 min", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Milad Farahani",
+            "email": "miladsf01@gmail.com",
+            "experience": 1,
+            "country_of_origin": "Sweden",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "2 days", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "3 hours", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "2 hours", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "4 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "1 day", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "2 hours", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Noel Tesfalidet",
+            "email": "noetes@outlook.com",
+            "experience": 4,
+            "country_of_origin": "Sweden",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "1 day", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "3 days", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "2 hours", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "30 min", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "40 min", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "1 day", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "3 hours", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Leo Hammar",
+            "email": "Not provided",
+            "experience": 4,
+            "country_of_origin": "Sweden",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "10 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "30 min", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "45 min", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "30 min", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30 min", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "30 min", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "30 min", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "30 min", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "4 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "30 min", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Maja",
+            "email": "Not provided",
+            "experience": 1,
+            "country_of_origin": "Sweden",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "10 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "2 hours", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "30 min", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "8 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "2 hours", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Daniel",
+            "email": "Not provided",
+            "experience": 8,
+            "country_of_origin": "Sweden",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "8 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "8 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "2 hours", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30 min", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "8 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "2 hours", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Isak Nyström",
+            "email": "Not provided",
+            "experience": 4,
+            "country_of_origin": "Sweden",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "4 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "30 min", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "30 min", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30 min", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "30 min", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "30 min", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "30 min", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "4 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "2 hours", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Freja Lindholm",
+            "email": "Not provided",
+            "experience": 5,
+            "country_of_origin": "Sweden",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "5 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "8 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30 min", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {
+                    "step": "Build and test automation",
+                    "time": "3 hours",
+                    "comment": "2 hours",
+                },
+                {
+                    "step": "Staging deployment and testing",
+                    "time": "1 hour",
+                    "comment": "1 hour",
+                },
+                {"step": "Stakeholder review", "time": "45 min", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "2 hour", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "2 hour", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "2 hour", "comment": "No comment provided"},
+            ],
+        },
+    },
+    {
+        "personal_info": {
+            "name": "Filip Amgren",
+            "email": "Not provided",
+            "experience": 2,
+            "country_of_origin": "Sweden",
+            "exam_id": "Not provided",
+        },
+        "process_steps": {
+            "issueLifecycle": [
+                {"step": "Investigation and root cause analysis", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Implementation planning and design", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Development and testing", "time": "8 hours", "comment": "No comment provided"},
+                {"step": "Documentation and pull request", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Issue verification and closure", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "codeReviewProcess": [
+                {"step": "Code cleanup and documentation", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Running tests locally", "time": "30 min", "comment": "No comment provided"},
+                {"step": "Peer review process", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Addressing feedback", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Final approval", "time": "30 min", "comment": "No comment provided"},
+            ],
+            "deploymentProcess": [
+                {"step": "Build and test automation", "time": "2 hours", "comment": "No comment provided"},
+                {"step": "Staging deployment and testing", "time": "30 min", "comment": "No comment provided"},
+                {"step": "Stakeholder review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Production deployment", "time": "45 min", "comment": "No comment provided"},
+                {"step": "Post-deployment verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+            "bugFixProcess": [
+                {"step": "Bug investigation and reproduction", "time": "3 hours", "comment": "No comment provided"},
+                {"step": "Fix implementation and testing", "time": "8 hours", "comment": "No comment provided"},
+                {"step": "Documentation and review", "time": "1 hour", "comment": "No comment provided"},
+                {"step": "Deployment and verification", "time": "1 hour", "comment": "No comment provided"},
+            ],
+        },
+    },
+]
+def parse_time_str(t: str) -> float:
+    """
+    Parse a time string (like "5 minutes", "1 hour", "3 days", "skip", "30mins",
+    "1 week", or even "3-4 days") into total minutes as a float.
+
+    - "skip" => 0.0
+    - 1 day => 8 hours => 480 minutes
+    - 1 week => 5 days => 5 * 8 hours => 40 hours => 2400 minutes
+    - Ranges like "3-4 days" => average = 3.5 days => 3.5 * 8 hours => * 60 minutes
+    """
+    t = t.strip().lower()
+    if t in ["skip", ""]:
+        return 0.0
+
+    # handle ranges like "3-4 days"
+    match_range = re.match(r"(\d+(?:\.\d+)?)\-(\d+(?:\.\d+)?)\s*days?", t)
+    if match_range:
+        d1 = float(match_range.group(1))
+        d2 = float(match_range.group(2))
+        avg_days = (d1 + d2) / 2.0
+        return avg_days * 8 * 60
+
+    # handle weeks: "1 week", "2 weeks", etc. => 5 working days each
+    match_week = re.match(r"(\d+(?:\.\d+)?)\s*weeks?", t)
+    if match_week:
+        w = float(match_week.group(1))
+        return w * 5 * 8 * 60  # 1 week = 5*8 hours = 40 hours => 2400 minutes
+
+    # handle days: "2 days", "1 day", etc.
+    match_days = re.match(r"(\d+(?:\.\d+)?)\s*days?", t)
+    if match_days:
+        d = float(match_days.group(1))
+        return d * 8 * 60
+
+    # singular "day"
+    match_day_singular = re.match(r"(\d+(?:\.\d+)?)\s*day$", t)
+    if match_day_singular:
+        d = float(match_day_singular.group(1))
+        return d * 8 * 60
+
+    # handle hours: "2 hours", "1 hour", "2.5 hours"
+    match_hours = re.match(r"(\d+(?:\.\d+)?)\s*hours?", t)
+    if match_hours:
+        h = float(match_hours.group(1))
+        return h * 60
+
+    # handle singular hour just in case
+    match_hour_singular = re.match(r"(\d+(?:\.\d+)?)\s*hour$", t)
+    if match_hour_singular:
+        h = float(match_hour_singular.group(1))
+        return h * 60
+
+    # handle minutes: "30 min", "30 mins", "30 minutes"
+    match_minutes = re.match(r"(\d+(?:\.\d+)?)\s*min", t)
+    if match_minutes:
+        m = float(match_minutes.group(1))
+        return m
+
+    # fallback if unrecognized
+    return 0.0
+
+def get_country_process_times(participants):
+    """
+    Returns a dict of form:
+      {
+         "issueLifecycle": {
+             "total_avg": <float>,   # average total minutes across participants
+             "steps": [
+                {"name": step_name, "avg_minutes": <float>}, ...
+             ]
+         },
+         "codeReviewProcess": { ... },
+         "deploymentProcess": { ... },
+         "bugFixProcess": { ... }
+      }
+
+    For each process, we collect all step times from every participant:
+    - Summation for a participant’s process => "participant total"
+    - The average of those totals => "total_avg"
+    - Each step’s name => average of all times that step name appears across participants
+    """
+    # The typical steps in each process to maintain an ordering:
+    known_processes = {
+        "issueLifecycle": [
+            "Investigation and root cause analysis",
+            "Implementation planning and design",
+            "Development and testing",
+            "Documentation and pull request",
+            "Issue verification and closure",
+        ],
+        "codeReviewProcess": [
+            "Code cleanup and documentation",
+            "Running tests locally",
+            "Peer review process",
+            "Addressing feedback",
+            "Final approval",
+        ],
+        "deploymentProcess": [
+            "Build and test automation",
+            "Staging deployment and testing",
+            "Stakeholder review",
+            "Production deployment",
+            "Post-deployment verification",
+        ],
+        "bugFixProcess": [
+            "Bug investigation and reproduction",
+            "Fix implementation and testing",
+            "Documentation and review",
+            "Deployment and verification",
+        ],
+    }
+
+    # process_step_times[process_name][step_name] => list of minute-values from each participant
+    from collections import defaultdict
+    process_step_times = defaultdict(lambda: defaultdict(list))
+    # Keep track of total times per participant for each process
+    process_participant_totals = defaultdict(list)
+
+    for participant in participants:
+        psteps = participant.get("process_steps", {})
+
+        for process_name in known_processes.keys():
+            steps_list = psteps.get(process_name, [])
+            total_for_participant = 0.0
+
+            # gather step times
+            for step_obj in steps_list:
+                step_name = step_obj["step"]
+                minutes_val = parse_time_str(step_obj["time"])
+                process_step_times[process_name][step_name].append(minutes_val)
+                total_for_participant += minutes_val
+
+            # record total for that participant
+            process_participant_totals[process_name].append(total_for_participant)
+
+    # Now compute averages
+    results = {}
+    import statistics
+
+    for process_name, step_order in known_processes.items():
+        # average total minutes across all participants
+        totals = process_participant_totals[process_name]
+        avg_total = statistics.mean(totals) if len(totals) > 0 else 0.0
+
+        # steps: we want them in a consistent order (the “known” steps first,
+        # then any extra steps if participants introduced them)
+        all_step_names = set(process_step_times[process_name].keys())
+        # figure out if we have "extra" steps not in the typical known list
+        extras = list(all_step_names - set(step_order))
+        extras.sort()
+
+        final_step_order = step_order + extras
+
+        step_info = []
+        for step_nm in final_step_order:
+            times_list = process_step_times[process_name][step_nm]
+            if times_list:
+                avg_step = statistics.mean(times_list)
+            else:
+                avg_step = 0.0
+            step_info.append({"name": step_nm, "avg_minutes": avg_step})
+
+        results[process_name] = {
+            "total_avg": avg_total,
+            "steps": step_info
+        }
+
+    return results
+
+def produce_summary_for_country(country_name, participants):
+    """
+    Produce a formatted text summary of process times for a given country.
+    """
+    data = get_country_process_times(participants)
+    # Sort processes by descending average total time
+    sorted_processes = sorted(data.items(), key=lambda x: x[1]["total_avg"], reverse=True)
+
+    lines = [f"=== {country_name} ==="]
+    for proc_name, proc_val in sorted_processes:
+        total_min = proc_val["total_avg"]
+        lines.append(f"{proc_name} => Average Total Time: {total_min:.2f} minutes")
+
+        # Show each step’s name and average minutes
+        for st in proc_val["steps"]:
+            step_name = st["name"]
+            step_avg = st["avg_minutes"]
+            lines.append(f"   {step_name}: {step_avg:.2f} minutes")
+
+        lines.append("")  # blank line separator
+
+    return "\n".join(lines)
+
+# Now let's produce the final text using the code
+summary_rwanda = produce_summary_for_country("Rwanda", participants_rwanda)
+summary_netherlands = produce_summary_for_country("Netherlands", dutch_participants)
+summary_sweden = produce_summary_for_country("Sweden", swedish_participants)
+
+final_output = summary_rwanda + "\n" + summary_netherlands + "\n" + summary_sweden
+print(final_output)
+
+
+
+
+
+
+
+
+#####
+
+def top_and_bottom_steps_for_country(country_name, participants, top_n=5):
+    """
+    1) Computes get_country_process_times for the country's participants.
+    2) Aggregates all step names (and their avg_minutes) across all processes.
+    3) Sorts them descending by avg_minutes.
+    4) Prints the top N highest and bottom N lowest step times.
+    """
+    # 1) Get the aggregated data
+    country_data = get_country_process_times(participants)
+
+    # 2) Gather all steps across all processes
+    #    We'll store them as tuples: (step_name, process_name, avg_minutes)
+    all_steps = []
+    for process_name, process_info in country_data.items():
+        for step_dict in process_info["steps"]:
+            step_name = step_dict["name"]
+            avg_min = step_dict["avg_minutes"]
+            if avg_min > 0:
+                all_steps.append((step_name, process_name, avg_min))
+            else:
+                # If avg_min is 0, it means the step was never used or "skip"
+                # You can decide whether to exclude or include
+                all_steps.append((step_name, process_name, 0.0))
+
+    # 3) Sort them in descending order of avg_minutes
+    all_steps_sorted = sorted(all_steps, key=lambda x: x[2], reverse=True)
+
+    # 4) Slice out the top N and bottom N
+    top_n_steps = all_steps_sorted[:top_n]
+    bottom_n_steps = all_steps_sorted[-top_n:]  # last top_n in ascending order
+
+    # Print or build a string summary
+    print(f"=== Top {top_n} Steps for {country_name} ===")
+    for (step_name, proc_name, minutes) in top_n_steps:
+        print(f"  {step_name} (Process: {proc_name}) => {minutes:.2f} minutes")
+
+    print("")
+    print(f"=== Bottom {top_n} Steps for {country_name} ===")
+    for (step_name, proc_name, minutes) in reversed(bottom_n_steps):
+        # reversed() because bottom_n_steps are in ascending order.
+        print(f"  {step_name} (Process: {proc_name}) => {minutes:.2f} minutes")
+
+    print("")
+
+
+# Usage Example:
+print("TOP/BOTTOM STEPS: RWANDA\n")
+top_and_bottom_steps_for_country("Rwanda", participants_rwanda, top_n=5)
+
+print("TOP/BOTTOM STEPS: NETHERLANDS\n")
+top_and_bottom_steps_for_country("Netherlands", dutch_participants, top_n=5)
+
+print("TOP/BOTTOM STEPS: SWEDEN\n")
+top_and_bottom_steps_for_country("Sweden", swedish_participants, top_n=5)
+
+
+def plot_stacked_bar_process_steps(country_data, process_name, country_name):
+    """
+    Creates and shows a single stacked bar chart that breaks down
+    all the step times in a single process for the given country.
+
+    country_data: dict from get_country_process_times(...)
+    process_name: e.g. "issueLifecycle", "codeReviewProcess", etc.
+    country_name: for the chart title
+    """
+    import matplotlib.pyplot as plt
+
+    # Extract step info for the specified process
+    process_info = country_data.get(process_name, {})
+    steps_info = process_info.get("steps", [])
+
+    # We'll create a single bar at x=0 labeled with process_name
+    # Each stack segment is a different step in that process
+    step_names = [s["name"] for s in steps_info]
+    step_values = [s["avg_minutes"] for s in steps_info]
+
+    # Start a fresh figure
+    plt.figure()
+
+    bottom_value = 0.0  # we stack from bottom=0 upward
+    for val, s_name in zip(step_values, step_names):
+        plt.bar(process_name, val, bottom=bottom_value, label=s_name)
+        bottom_value += val
+
+    plt.ylabel("Minutes")
+    plt.title(f"Step Breakdown for {process_name} - {country_name}")
+    plt.legend()  # show each step's label in the legend
+
+    plt.show()
+
+
+
+def get_top_and_bottom_steps(country_data, top_n=5):
+    """
+    From a country_data dict (from get_country_process_times), return:
+    - top_n steps with highest average time
+    - bottom_n steps with lowest average time
+    Returns:
+        (top_steps, bottom_steps): each is a list of dicts with 'name' and 'avg_minutes'
+    """
+    all_steps = []
+
+    for process in country_data.values():
+        for step in process["steps"]:
+            all_steps.append(step)
+
+    # Sort descending for top, ascending for bottom
+    top_steps = sorted(all_steps, key=lambda x: x["avg_minutes"], reverse=True)[:top_n]
+    bottom_steps = sorted(all_steps, key=lambda x: x["avg_minutes"])[:top_n]
+
+    return top_steps, bottom_steps
+
+import matplotlib.pyplot as plt
+
+def plot_top_and_bottom_steps(country_data, country_name, top_n=5):
+    """
+    Plots bar charts for the top N and bottom N steps for a given country.
+    """
+    top_steps, bottom_steps = get_top_and_bottom_steps(country_data, top_n=top_n)
+
+    # --- Plot Top N Steps ---
+    plt.figure(figsize=(10, 5))
+    step_names = [step["name"] for step in top_steps]
+    avg_times = [step["avg_minutes"] for step in top_steps]
+
+    plt.barh(step_names, avg_times)
+    plt.xlabel("Average Time (minutes)")
+    plt.title(f"Top {top_n} Steps by Time - {country_name}")
+    plt.gca().invert_yaxis()
+    plt.tight_layout()
+    plt.show()
+
+    # --- Plot Bottom N Steps ---
+    plt.figure(figsize=(10, 5))
+    step_names = [step["name"] for step in bottom_steps]
+    avg_times = [step["avg_minutes"] for step in bottom_steps]
+
+    plt.barh(step_names, avg_times)
+    plt.xlabel("Average Time (minutes)")
+    plt.title(f"Bottom {top_n} Steps by Time - {country_name}")
+    plt.gca().invert_yaxis()
+    plt.tight_layout()
+    plt.show()
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+def compare_common_steps_across_countries(country_datasets, country_names, top=True, top_n=5):
+    """
+    country_datasets: list of data from get_country_process_times([...])
+    country_names: list of country names in same order
+    top: if True, get top N steps; else bottom N steps
+    top_n: how many steps to compare
+
+    Produces a grouped bar chart comparing time spent on same steps across countries.
+    """
+    # Combine all step averages across countries to find most common top/bottom N
+    step_totals = {}
+
+    for data in country_datasets:
+        for proc in data.values():
+            for step in proc["steps"]:
+                name = step["name"]
+                step_totals.setdefault(name, []).append(step["avg_minutes"])
+
+    # Compute average time per step (across countries), used to select top/bottom steps
+    step_avg = {step: np.mean(times) for step, times in step_totals.items()}
+    sorted_steps = sorted(step_avg.items(), key=lambda x: x[1], reverse=top)
+    selected_steps = [name for name, _ in sorted_steps[:top_n]]
+
+    # Now prepare data for plotting
+    x = np.arange(len(selected_steps))  # the step positions
+    bar_width = 0.25
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    for i, (country_data, country_name) in enumerate(zip(country_datasets, country_names)):
+        values = []
+        # Build values in same order as selected_steps
+        for step in selected_steps:
+            found = False
+            for proc in country_data.values():
+                for s in proc["steps"]:
+                    if s["name"] == step:
+                        values.append(s["avg_minutes"])
+                        found = True
+                        break
+                if found:
+                    break
+            if not found:
+                values.append(0.0)  # step missing for that country
+
+        ax.bar(x + i * bar_width, values, width=bar_width, label=country_name)
+
+    ax.set_xlabel("Process Step")
+    ax.set_ylabel("Average Time (minutes)")
+    ax.set_title(f"{'Top' if top else 'Bottom'} {top_n} Steps - Country Comparison")
+    ax.set_xticks(x + bar_width * (len(country_names) - 1) / 2)
+    ax.set_xticklabels(selected_steps, rotation=30, ha="right")
+    ax.legend()
+    plt.tight_layout()
+    plt.show()
+
+
+
+
+rwanda_data = get_country_process_times(participants_rwanda)
+plot_stacked_bar_process_steps(rwanda_data, "issueLifecycle", "Rwanda")
+
+# After calling get_country_process_times for Rwanda:
+rwanda_data = get_country_process_times(participants_rwanda)
+# Prepare your data
+#rwanda_data = get_country_process_times(participants_rwanda)
+netherlands_data = get_country_process_times(dutch_participants)
+sweden_data = get_country_process_times(swedish_participants)
+
+# Compare top 5 steps
+compare_common_steps_across_countries(
+    [rwanda_data, netherlands_data, sweden_data],
+    ["Rwanda", "Netherlands", "Sweden"],
+    top=True,  #set to False to get bottom 5
+    top_n=5
+)
+
+
+# Visualize top and bottom 5 steps:
+plot_top_and_bottom_steps(rwanda_data, "Rwanda", top_n=5)
+
+
+
