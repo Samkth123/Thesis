@@ -1,0 +1,982 @@
+# Step 1: Install necessary libraries
+# pip install transformers torch scikit-learn numpy pandas matplotlib
+
+import numpy as np
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score  # Optional
+from sklearn.decomposition import PCA  # For dimensionality reduction
+import matplotlib.pyplot as plt  # For plotting
+import warnings
+
+# --- Imports for Hugging Face Transformers and PyTorch ---
+import torch
+from transformers import AutoTokenizer, AutoModel
+
+# -----------------------------------------------------------
+
+warnings.filterwarnings("ignore", category=FutureWarning)  # Ignore KMeans future warning
+
+# Step 2: Prepare your data
+# Combined data from your code challenge participants
+# (Skipping system design answers as requested; only name, country, experience, language, and code)
+data = [
+    {
+        "name": "Muhire",
+        "country": "Rwanda",
+        "experience": 5,
+        "language": "none",
+        "code": "FAILED"
+    },
+    {
+        "name": "Merlyne",
+        "country": "Rwanda",
+        "experience": 2,
+        "language": "javascript",
+        "code": """function findPairs(nums, target) {
+    const arr = [];
+    for (i = 0; i <= nums.length; i++) {
+        for (j = 1; j <= nums.length - 1; j++) {
+            if (nums[i] + nums[j] === target) {
+                arr.push([nums[i], nums[j]]);
+            }
+        }
+    }
+    return arr;
+}"""
+    },
+    {
+        "name": "Elvis",
+        "country": "Rwanda",
+        "experience": 5,
+        "language": "javascript",
+        "code": """function findPairs(nums, target) {
+    const sortedNums = nums.sort((a, b) => a - b);
+    let pairs = new Set();
+    let rightIndex = sortedNums.length - 1;
+
+    for (let i = 0; i < sortedNums.length; i++) {
+        let current = sortedNums[i];
+        if (current + sortedNums[rightIndex] === target) {
+            pairs.add(\`(\${current}, \${sortedNums[rightIndex]})\`);
+            rightIndex -= 1;
+        }
+    }
+
+    return Array.from(pairs);
+}"""
+    },
+    {
+        "name": "Adeline and Laisa",
+        "country": "Rwanda",
+        "experience": 1,
+        "language": "javascript",
+        "code": """function checkSum(numbers, targetSum) {
+    let pairs = [];
+    let seenPairs = new Set();
+
+    for (let i = 0; i < numbers.length; i++) {
+        for (let j = i + 1; j < numbers.length; j++) {
+            let num1 = numbers[i];
+            let num2 = numbers[j];
+
+            if (num1 + num2 === targetSum) {
+                let pair = [Math.min(num1, num2), Math.max(num1, num2)];
+                let pairString = pair.toString();
+
+                if (!seenPairs.has(pairString)) {
+                    seenPairs.add(pairString);
+                    pairs.push(pair);
+                }
+            }
+        }
+    }
+
+    return pairs;
+}"""
+    },
+    {
+        "name": "Fred and Epa",
+        "country": "Rwanda",
+        "experience": 1,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    pair = []
+    length = len(nums)
+    for i in range(length):
+        for j in range(i+1, length):
+            if nums[i] + nums[j] == target:
+                pair.append((nums[i], nums[j]))
+    print(pair)
+
+nums = [1, 5, 3, 7, 4]
+target = 8
+find_pairs(nums, target)
+"""
+    },
+    {
+        "name": "Issa",
+        "country": "Rwanda",  # Not explicitly stated, assuming Rwanda
+        "experience": 5,
+        "language": "javascript",
+        "code": """function findPairs(nums, target) {
+    const pairs = [];
+
+    for(let i = 0; i < nums.length - 1; i++){
+        for(let j = i + 1; j < nums.length - 1; j++){
+            if(nums[i] + nums[j] == target){
+                pairs.push(nums[i]);
+                pairs.push(nums[j]);
+            }
+        }
+    }
+
+    return pairs;
+}"""
+    },
+    {
+        "name": "Irakunda",
+        "country": "Rwanda",
+        "experience": 2,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    pairs = []
+    lengthOfList = len(nums)
+    for i in nums:
+        for indx in range(nums.index(i)+1, lengthOfList):
+            if i + nums[indx] == target:
+                pairs.append((i, nums[indx]))
+    return pairs
+"""
+    },
+    {
+        "name": "Fabrice",
+        "country": "Rwanda",
+        "experience": 2,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    seen = set()
+    pairs = set()
+
+    for num in nums:
+        complement = target - num
+        if complement in seen:
+            pairs.add((min(num, complement), max(num, complement)))
+        seen.add(num)
+
+    return list(pairs)
+"""
+    },
+    {
+        "name": "Jordan",
+        "country": "Rwanda",
+        "experience": 1,
+        "language": "python",
+        "code": """def each_pairs(numbers, target):
+    checked_numbers = set()
+    pairsOfNum = set()
+
+    for number in numbers:
+        complement = target - number
+        if complement in checked_numbers:
+            pairsOfNum.add(tuple(sorted((number, complement))))
+        checked_numbers.add(number)
+
+    return list(pairsOfNum)
+"""
+    },
+    {
+        "name": "David Tubirye",
+        "country": "Rwanda",  # Not specified in text
+        "experience": 3,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    pairs = []
+
+    for i in range(len(nums)):
+        for j in range(i + 1, len(nums)):
+            if nums[i] + nums[j] == target:
+                pair = tuple(sorted((nums[i], nums[j])))
+                if pair not in pairs:
+                    pairs.append(pair)
+
+    return pairs
+"""
+    },
+    {
+        "name": "David Hitimana",
+        "country": "Rwanda",
+        "experience": 0,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    res = []
+    for outercount in range(0, len(nums)):
+        for innercount in range(1, len(nums)):
+            if nums[outercount] + nums[innercount] == target:
+                res.append([nums[outercount], nums[innercount]])
+    return res
+"""
+    },
+    {
+        "name": "Brian Gitego",
+        "country": "Rwanda",
+        "experience": 5,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    list_of_pairs = []
+
+    for num in nums:
+        diff = target - num
+        if diff in nums and diff != num:
+            pair = (num, diff)
+            reverse_pair = (diff, num)
+            if pair not in list_of_pairs and reverse_pair not in list_of_pairs:
+                list_of_pairs.append(pair)
+
+    return list_of_pairs
+"""
+    },
+    {
+        "name": "mutabaruka fred",
+        "country": "Rwanda",
+        "experience": 0,  # Not provided; assuming 0
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    pair = []
+    length = len(nums)
+    for i in range(length):
+        for j in range(i+1, length):
+            if nums[i] + nums[j] == target:
+                pair.append((nums[i], nums[j]))
+                # print(pair)
+    return pair
+"""
+    },
+]
+
+# New submissions to append
+new_data = [
+    {
+        "name": "Sabila Osman",
+        "country": "Uganda",
+        "experience": 3,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+
+    seen = set() 
+    pairs = set()  
+
+    for num in nums:
+        complement = target - num
+        if complement in seen:
+            pair = tuple(sorted((num, complement)))
+            pairs.add(pair)
+        seen.add(num)
+
+    return list(pairs)
+
+
+nums1 = [1, 5, 3, 7, 4]
+target1 = 8
+print(f"Unique Pairs for {nums1} with target {target1}: {find_pairs(nums1, target1)}")
+"""
+    },
+    {
+        "name": "Queen Pinklen Asasira",
+        "country": "Uganda",
+        "experience": 1,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+result = []
+    for i in range(len(nums)):
+        for j in range(i + 1, len(nums)):
+            if nums[i] + nums[j] == target:
+                result.append((nums[i], nums[j]))
+    return result
+
+
+nums1 = [1, 5, 3, 7, 4]
+target = 8
+print(unique_pairs(nums1,target1))
+
+nums2 = [2, 2, 4, 4]
+target = 8
+print(unique-pairs(nums2,target2))
+"""
+    },
+    {
+        "name": "Nuwahereza Peter",
+        "country": "Uganda",
+        "experience": 2,
+        "language": "python",
+        "code": """def find_pairs(nums, target)
+    count = {}
+    result = set()
+    for num in nums:
+        if target - num in count:
+            result.add((min(num, target - num), max(num, target - num)))
+        count[num] = 1
+    return list(result)
+
+nums = [2, 5, 3, 7, 4, 8, 9, 10]
+target = 8
+print(unique_pairs(nums, target)) 
+"""
+    },
+    {
+        "name": "Asio Brenda",
+        "country": "Uganda",
+        "experience": 3,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+  #using a set because it has no duplicates
+    paired_numbers = set()
+    for n in nums:
+        num = target - n
+        if num in nums and (num, n) not in paired_numbers:
+            paired_numbers.add((n,num))
+    return list(paired_numbers)
+
+
+
+arr1 = [1, 5, 3, 7, 4]
+target = 8
+print(find_pairs(arr1, target))
+"""
+    },
+    {
+        "name": "Elijah Rwothoromo",
+        "country": "Uganda",
+        "experience": 8,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    output = []
+    sum_nums = sum(nums)
+    len_nums = len(nums)
+    while sum_nums >= 8:
+        for i in range(len_nums-1):
+            for j in range(1, len_nums-1):
+                if (i+j < len_nums):
+                    if (nums[i] + nums[i+j]) == target:
+                        output.append((nums[i], nums[i+j]))
+                        nums.pop(i+j)
+                        nums.pop(i)
+                        len_nums = len(nums)
+                        sum_nums = sum(nums)
+                        break
+    return output
+"""
+    },
+    {
+        "name": "Bushobozi Bush Ivan",
+        "country": "Uganda",
+        "experience": 1,
+        "language": "python",
+        "code": """print("**********************************************")
+print("Assessment to compute possible targets")
+print("Targets are set by a user")
+print("Range from 1 to 1000000")
+print("********One to one million*******")
+def find_pairs(numbers, target):
+    seen = set()
+    pairs = set()
+
+    # Loop through the numbers
+    for number in numbers:
+        complement = target - number
+        if complement in seen:
+            pairs.add((min(number, complement), max(number, complement)))
+        seen.add(number)
+
+    return list(pairs)
+
+# Our numbers list from 1 to 1000000
+numbers = list(range(1, 1000000))
+
+# Ask for user target value
+target = int(input("Enter the target value: "))
+
+# Print all possible pairs to achieve the target
+print("Possible pairs to achieve target:")
+print(find_pairs(numbers, target))
+print("**********************************************")
+"""
+    }
+]
+
+sweden_participants = [
+    {
+        "name": "Noel Tesfalidet",
+        "country": "Sweden",
+        "experience": 4,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    map = dict()
+    set_pairs = set()
+    for i in range(len(nums)):
+        map[nums[i]] = True
+
+    for i in range(len(nums)):
+        if target - nums[i] in map:
+            if(nums[i] < target - nums[i]):
+                set_pairs.add((nums[i], target - nums[i]))
+            else:
+                set_pairs.add((target - nums[i], nums[i]))
+
+    return list(set_pairs)"""
+    },
+    {
+        "name": "Milad Farahani",
+        "country": "Sweden",
+        "experience": 1,
+        "language": "python",
+        "code": """from collections import Counter
+
+def find_pairs(nums, target):
+    count = Counter(nums)
+    results = []
+
+    for num in count:
+        find = target - num
+        if find in count:
+            if num == find and count[num] >= 2:
+                results.append((num, find))
+            elif num < find:
+                results.append((num, find))
+
+    return results"""
+    },
+    {
+        "name": "Atheer Salim",
+        "country": "Sweden",
+        "experience": 5,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+	res = set()
+	complements = set()
+
+	for num in nums:
+		complement = target - num
+		if complement in complements:
+			pair = (min(num, complement), max(num, complement))
+			res.add(pair)
+		complements.add(num)
+
+	return list(res)
+
+print(find_pairs([1, 5, 3, 7, 4], 8))
+print(find_pairs([2, 2, 4, 4], 8))"""
+    },
+    {
+        "name": "Iley Alvarez Funcke",
+        "country": "Sweden",
+        "experience": 8,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+output = []
+    for i in range(len(nums)):
+        for j in range(i + 1, len(nums)):
+            if nums[i] + nums[j] == target:
+                output.append((nums[i], nums[j]))
+    return output"""
+    },
+    {
+        "name": "Freja Lindholm",
+        "country": "Sweden",
+        "experience": 5,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    seen = set()
+    pairs = set()
+    for num in nums:
+        complement = target - num
+        if complement in seen:
+            pairs.add(tuple(sorted((num, complement))))
+        seen.add(num)
+    return list(pairs)"""
+    },
+    {
+        "name": "Isak Nyström",
+        "country": "Sweden",
+        "experience": 4,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    pairs = set()
+    seen = set()
+    for num in nums:
+        if (target - num) in seen:
+            pairs.add(tuple(sorted((num, target - num))))
+        seen.add(num)
+    return list(pairs)"""
+    },
+    {
+        "name": "Daniel",
+        "country": "Sweden",
+        "experience": 8,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    seen = set()
+    pairs = set()
+    for num in nums:
+        if (target - num) in seen:
+            pairs.add(tuple(sorted((num, target - num))))
+        seen.add(num)
+    return list(pairs)"""
+    },
+    {
+        "name": "Maja",
+        "country": "Sweden",
+        "experience": 1,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    result = set()
+    visited = set()
+    for num in nums:
+        if (target - num) in visited:
+            result.add(tuple(sorted((num, target - num))))
+        visited.add(num)
+    return list(result)"""
+    },
+    {
+        "name": "Filip Amgren",
+        "country": "Sweden",
+        "experience": 2,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    seen = set()
+    result = set()
+    for n in nums:
+        if target - n in seen:
+            result.add(tuple(sorted((n, target - n))))
+        seen.add(n)
+    return list(result)"""
+    },
+    {
+        "name": "Leo Hammar",
+        "country": "Sweden",
+        "experience": 4,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    seen = {}
+    pairs = set()
+    for num in nums:
+        complement = target - num
+        if complement in seen:
+            pairs.add((min(num, complement), max(num, complement)))
+        seen[num] = True
+    return list(pairs)"""
+    },
+]
+
+netherlands_participants = [
+    {
+        "name": "Tess de Vries",
+        "country": "Netherlands",
+        "experience": 7,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    seen = {}
+    result = set()
+    for num in nums:
+        diff = target - num
+        if diff in seen:
+            result.add((min(num, diff), max(num, diff)))
+        seen[num] = True
+    return list(result)"""
+    },
+    {
+        "name": "Rick",
+        "country": "Netherlands",
+        "experience": 5,
+        "language": "python",
+        "code": """def find_pairs(numbers, target_sum):
+    cache = {}
+    output = set()
+    for val in numbers:
+        complement = target_sum - val
+        if complement in cache:
+            output.add((min(val, complement), max(val, complement)))
+        cache[val] = True
+    return list(output)"""
+    },
+    {
+        "name": "Sanne Visser",
+        "country": "Netherlands",
+        "experience": 1,
+        "language": "python",
+        "code": """def find_pairs(data, target):
+    lookup = {}
+    result_pairs = set()
+    for entry in data:
+        needed = target - entry
+        if needed in lookup:
+            result_pairs.add((min(entry, needed), max(entry, needed)))
+        lookup[entry] = True
+    return list(result_pairs)"""
+    },
+    {
+        "name": "Maarten",
+        "country": "Netherlands",
+        "experience": 6,
+        "language": "python",
+        "code": """def find_pairs(nums_list, goal):
+    seen_values = {}
+    unique = set()
+    for val in nums_list:
+        gap = goal - val
+        if gap in seen_values:
+            unique.add(tuple(sorted((val, gap))))
+        seen_values[val] = True
+    return list(unique)"""
+    },
+    {
+        "name": "Esmee",
+        "country": "Netherlands",
+        "experience": 2,
+        "language": "python",
+        "code": """def find_pairs(values, target):
+    values.sort()
+    result = set()
+    left, right = 0, len(values) - 1
+
+    while left < right:
+        current_sum = values[left] + values[right]
+        if current_sum == target:
+            result.add((values[left], values[right]))
+            left += 1
+            right -= 1
+        elif current_sum < target:
+            left += 1
+        else:
+            right -= 1
+    return list(result)"""
+    },
+    {
+        "name": "Cas",
+        "country": "Netherlands",
+        "experience": 4,
+        "language": "python",
+        "code": """def find_pairs(entries, expected_sum):
+    seen = {}
+    output = set()
+    for element in entries:
+        remainder = expected_sum - element
+        if remainder in seen:
+            output.add((min(element, remainder), max(element, remainder)))
+        seen[element] = True
+    return list(output)"""
+    },
+    {
+        "name": "Lucas",
+        "country": "Netherlands",
+        "experience": 2,
+        "language": "python",
+        "code": """def find_pairs(series, total):
+    pairs = set()
+    for i in range(len(series)):
+        for j in range(i + 1, len(series)):
+            if series[i] + series[j] == total:
+                pair = tuple(sorted((series[i], series[j])))
+                pairs.add(pair)
+    return list(pairs)"""
+    },
+    {
+        "name": "Hanous Dedki",
+        "country": "Netherlands",
+        "experience": 2,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    unique_pairs = set()
+
+    for i, val in enumerate(nums):
+        for j in range(i + 1, len(nums)):
+            if (val + nums[j]) == target:
+                pair = tuple(sorted((val, nums[j])))
+                if pair not in unique_pairs:
+                    unique_pairs.add(pair)
+    return list(unique_pairs)"""
+    },
+    {
+        "name": "Thjis",
+        "country": "Netherlands",
+        "experience": 7,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    result = set()
+    nums_sorted = sorted(nums)
+    left, right = 0, len(nums_sorted) - 1
+
+    while left < right:
+        s = nums_sorted[left] + nums_sorted[right]
+        if s == target:
+            result.add((nums_sorted[left], nums_sorted[right]))
+            left += 1
+            right -= 1
+        elif s < target:
+            left += 1
+        else:
+            right -= 1
+    return list(result)"""
+    },
+    {
+        "name": "Bram",
+        "country": "Netherlands",
+        "experience": 3,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    result = set()
+    for i in range(len(nums)):
+        for j in range(i+1, len(nums)):
+            if nums[i] + nums[j] == target:
+                p = tuple(sorted((nums[i], nums[j])))
+                result.add(p)
+    return list(result)"""
+    },
+    {
+        "name": "Pjotr",
+        "country": "Netherlands",
+        "experience": 4,
+        "language": "python",
+        "code": """def find_pairs(nums, target):
+    pairs = set()
+    lookup = set()
+    for number in nums:
+        complement = target - number
+        if complement in lookup:
+            pairs.add(tuple(sorted((number, complement))))
+        lookup.add(number)
+    return list(pairs)"""
+    }
+]
+
+
+data.extend(new_data)
+
+data.extend(sweden_participants)
+data.extend(netherlands_participants)
+
+df = pd.DataFrame(data)
+
+# Filter out only Python submissions for clustering
+python_df = df[df['language'].str.lower() == 'python'].copy()
+print(f"Found {len(python_df)} Python code submissions for analysis.")
+
+if len(python_df) < 2:
+    print("Need at least 2 Python code submissions to perform clustering and visualization.")
+else:
+    # Step 3: Load CodeBERT Tokenizer and Model
+    print("Loading CodeBERT tokenizer and model...")
+    model_name = "microsoft/codebert-base"
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModel.from_pretrained(model_name)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model.to(device)
+        print(f"Model '{model_name}' loaded successfully on {device}.")
+    except Exception as e:
+        print(f"Error loading model {model_name}: {e}")
+        exit()
+
+    # Step 4: Generate Code Embeddings using CodeBERT
+    print("Generating code embeddings with CodeBERT...")
+    code_snippets = python_df['code'].astype(str).tolist()
+
+
+    def get_codebert_embeddings(code_list, batch_size=8):
+        all_embeddings = []
+        model.eval()
+        with torch.no_grad():
+            for i in range(0, len(code_list), batch_size):
+                batch = code_list[i: i + batch_size]
+                inputs = tokenizer(
+                    batch,
+                    padding=True,
+                    truncation=True,
+                    return_tensors="pt",
+                    max_length=512,
+                ).to(device)
+                outputs = model(**inputs)
+                last_hidden_states = outputs.last_hidden_state
+                attention_mask = inputs["attention_mask"]
+                mask_expanded = attention_mask.unsqueeze(-1).expand(last_hidden_states.size()).float()
+                sum_embeddings = torch.sum(last_hidden_states * mask_expanded, 1)
+                sum_mask = torch.clamp(mask_expanded.sum(1), min=1e-9)
+                mean_embeddings = sum_embeddings / sum_mask
+                all_embeddings.append(mean_embeddings.cpu().numpy())
+        return np.concatenate(all_embeddings, axis=0)
+
+
+    try:
+        embeddings = get_codebert_embeddings(code_snippets)
+        print("Embeddings generated.")
+        print("Embedding shape:", embeddings.shape)
+    except Exception as e:
+        print(f"Error generating embeddings: {e}")
+        exit()
+
+    # Step 5: Perform K-Means Clustering
+    n_samples = embeddings.shape[0]
+    if n_samples < 2:
+        print("Cannot perform clustering with less than 2 samples.")
+    else:
+        k = min(5, n_samples)  # Adjust k as needed
+        print(f"Performing K-Means clustering with k={k}...")
+        kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+        cluster_labels = kmeans.fit_predict(embeddings)
+        python_df["cluster"] = cluster_labels
+        print("Clustering complete.")
+
+        # Step 6: Analyze Results
+        print("\nClustering Results:")
+        print(python_df[["name", "country", "experience", "cluster"]])
+
+        # Step 7: Visualize the Clusters
+        print("\nGenerating cluster visualization...")
+
+        # Reduce dimensions using PCA
+        pca = PCA(n_components=2, random_state=42)
+        embeddings_2d = pca.fit_transform(embeddings)
+        python_df["pca1"] = embeddings_2d[:, 0]
+        python_df["pca2"] = embeddings_2d[:, 1]
+
+        # Create scatter plot
+        plt.figure(figsize=(10, 8))
+        scatter = plt.scatter(
+            python_df["pca1"],
+            python_df["pca2"],
+            c=python_df["cluster"],
+            cmap="viridis",
+            s=100,
+            alpha=0.7,
+        )
+
+
+        # Add annotations with both name and country
+        for i, row in python_df.iterrows():
+            label = f"{row['name']} ({row['country']})"
+            plt.annotate(
+                label,
+                (row["pca1"], row["pca2"]),
+                textcoords="offset points",
+                xytext=(0, 10),
+                ha="center",
+                fontsize=9,
+            )
+
+
+        '''
+        # Add annotations with only country
+        for i, row in python_df.iterrows():
+            label = f"{row['country']}"
+            plt.annotate(
+                label,
+                (row["pca1"], row["pca2"]),
+                textcoords="offset points",
+                xytext=(0, 10),
+                ha="center",
+                fontsize=9,
+            )
+            '''
+
+        # Add plot titles and labels
+        plt.title("Code Submission Clusters (CodeBERT Embeddings + PCA)", fontsize=16)
+        plt.xlabel("Principal Component 1", fontsize=12)
+        plt.ylabel("Principal Component 2", fontsize=12)
+
+        # Add legend (if more than 1 cluster)
+        if k > 1:
+            legend_elements = scatter.legend_elements()[0]
+            legend_labels = [f"Cluster {i}" for i in range(k)]
+            plt.legend(legend_elements, legend_labels, title="Clusters")
+
+        plt.grid(True, linestyle="--", alpha=0.5)
+        plt.show()
+        print("Visualization displayed.")
+
+        # Optional: Silhouette Score
+        if k > 1 and n_samples > 1:
+            try:
+                silhouette_avg = silhouette_score(embeddings, cluster_labels)
+                print(f"\nSilhouette Score: {silhouette_avg:.4f}")
+            except ValueError as e:
+                print(f"\nCould not calculate Silhouette Score: {e}")
+
+# Reminder about small dataset size
+if len(python_df) <= 3:
+    print(
+        "\nReminder: The analysis and visualization were performed on a very small dataset "
+        f"({len(python_df)} Python submissions). Clusters might not be distinct or meaningful."
+    )
+
+
+
+
+
+##### NEW TRY
+
+
+import seaborn as sns
+
+# Count how many submissions from each country fall into each cluster
+cluster_by_country = python_df.groupby(['country', 'cluster']).size().unstack(fill_value=0)
+
+# Plot
+cluster_by_country.plot(kind='bar', stacked=True, figsize=(10,6))
+plt.title("Cluster Distribution by Country")
+plt.ylabel("Number of Submissions")
+plt.xlabel("Country")
+plt.legend(title="Cluster")
+plt.tight_layout()
+plt.show()
+
+##### new try
+
+from sklearn.metrics.pairwise import cosine_distances
+import seaborn as sns
+
+# Get average embedding per country
+country_embeddings = python_df.groupby('country')['cluster'].apply(list)
+country_vectors = python_df.groupby('country')[['pca1', 'pca2']].mean()
+
+# Calculate distance between countries
+dist_matrix = cosine_distances(country_vectors)
+
+# Convert to DataFrame for plotting
+dist_df = pd.DataFrame(dist_matrix, index=country_vectors.index, columns=country_vectors.index)
+
+# Plot
+plt.figure(figsize=(8,6))
+sns.heatmap(dist_df, annot=True, cmap='coolwarm')
+plt.title("Code Similarity Between Countries (Cosine Distance)")
+plt.tight_layout()
+plt.show()
+
+
+####third try
+
+from sklearn.manifold import TSNE
+
+tsne = TSNE(n_components=2, random_state=42)
+tsne_results = tsne.fit_transform(embeddings)
+
+python_df['tsne1'] = tsne_results[:, 0]
+python_df['tsne2'] = tsne_results[:, 1]
+
+# Plot colored by country
+plt.figure(figsize=(10,8))
+sns.scatterplot(
+    x='tsne1',
+    y='tsne2',
+    hue='country',
+    data=python_df,
+    palette='Set2',
+    s=100,
+    alpha=0.8
+)
+plt.title("Code Similarity (TSNE Projection by Country)", fontsize=14)
+plt.xlabel("TSNE Component 1")
+plt.ylabel("TSNE Component 2")
+plt.legend(title="Country")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
